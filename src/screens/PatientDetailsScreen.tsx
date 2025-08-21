@@ -30,6 +30,7 @@ interface PatientData {
 
 const PatientDetailsScreen: React.FC<Props> = ({ navigation, route }) => {
   const { assuredId } = route.params;
+  console.log('PatientDetailsScreen rendered with assuredId:', assuredId);
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -99,6 +100,14 @@ const PatientDetailsScreen: React.FC<Props> = ({ navigation, route }) => {
             <Text style={styles.label}>Claim Status:</Text>
             <Text style={styles.statusText}>{patientData?.claimStatus}</Text>
           </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Assured ID:</Text>
+            <Text style={styles.statusText}>{assuredId}</Text>
+          </View>
+
+          
+
+          
 
           <TouchableOpacity style={styles.selectDrugsButton} onPress={handleSelectDrugs}>
             <Text style={styles.selectDrugsButtonText}>Select Drugs</Text>

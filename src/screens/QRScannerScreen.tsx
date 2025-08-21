@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Alert,
   TouchableOpacity,
   Dimensions,
   SafeAreaView,
@@ -12,7 +11,10 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App';
 import { Camera } from 'react-native-camera-kit';
 
-type QRScannerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'QRScanner'>;
+type QRScannerScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'QRScanner'
+>;
 
 interface Props {
   navigation: QRScannerScreenNavigationProp;
@@ -20,25 +22,17 @@ interface Props {
 
 const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
   const [isScanning, setIsScanning] = useState(false);
+  console.log('QRScannerScreen rendered', isScanning);
 
   const handleScan = (event: any) => {
     setIsScanning(false); // close scanner after scan
-    Alert.alert(
-      'QR Code Scanned!',
-      `Code: ${event.nativeEvent.codeStringValue}`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'View Details',
-          onPress: () => {
-            navigation.navigate('PatientDetails', { assuredId: event.nativeEvent.codeStringValue });
-          },
-        },
-      ]
-    );
+
+    const scannedCode = event.nativeEvent.codeStringValue;
+    console.log('Scanned code:', scannedCode);
+
+    if (scannedCode) {
+      navigation.navigate('PatientDetails', { assuredId: scannedCode });
+    }
   };
 
   return (
@@ -79,8 +73,8 @@ const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.instructions}>
           <Text style={styles.instructionsTitle}>How to use:</Text>
           <Text style={styles.instructionText}>• Tap "Scan QR Code" to start scanning</Text>
-          <Text style={styles.instructionText}>• A popup will show the scanned ID</Text>
-          <Text style={styles.instructionText}>• Click "View Details" to see patient information</Text>
+          <Text style={styles.instructionText}>• It will navigate directly after scan</Text>
+          <Text style={styles.instructionText}>• Example: PatientDetails screen</Text>
         </View>
       )}
     </SafeAreaView>
@@ -90,10 +84,7 @@ const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
 const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
   header: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -104,11 +95,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
+  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
   scannerContainer: {
     flex: 1,
     margin: 20,
@@ -127,16 +114,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  scannerIcon: {
-    fontSize: 80,
-    marginBottom: 20,
-  },
-  scannerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
+  scannerIcon: { fontSize: 80, marginBottom: 20 },
+  scannerTitle: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 10 },
   scannerSubtitle: {
     fontSize: 16,
     color: '#666',
@@ -152,11 +131,7 @@ const styles = StyleSheet.create({
     minWidth: 200,
     alignItems: 'center',
   },
-  scanButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+  scanButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   instructions: {
     backgroundColor: '#fff',
     margin: 20,
@@ -168,17 +143,8 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  instructionsTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  instructionText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 5,
-  },
+  instructionsTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 10 },
+  instructionText: { fontSize: 14, color: '#666', marginBottom: 5 },
 });
 
 export default QRScannerScreen;
