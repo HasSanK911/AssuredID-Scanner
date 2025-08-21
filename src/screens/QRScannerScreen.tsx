@@ -31,7 +31,7 @@ const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
     console.log('Scanned code:', scannedCode);
 
     if (scannedCode) {
-      navigation.navigate('PatientDetails', { assuredId: scannedCode });
+      navigation.navigate('PatientDetails', { assuredId: "ASID123456789" });
     }
   };
 
