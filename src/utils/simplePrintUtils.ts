@@ -2,18 +2,22 @@ import { Share, Alert } from 'react-native';
 
 export const printReceiptSimple = async (receiptData: {
   receiptId: string;
+  claimNumber: string;
   currentDate: string;
   patientName: string;
   selectedDrugs: any[];
   totalAmount: number;
 }): Promise<boolean> => {
   try {
-    const { receiptId, currentDate, patientName, selectedDrugs, totalAmount } = receiptData;
+    const { receiptId, claimNumber, currentDate, patientName, selectedDrugs, totalAmount } = receiptData;
     
     // Create a formatted receipt text
     const receiptText = `
 ╔══════════════════════════════════════════════════════════════╗
 ║                    AssuredID Scanner - Receipt               ║
+╠══════════════════════════════════════════════════════════════╣
+║ Claim Number: ${claimNumber.padEnd(35)} ║
+║ [${'█'.repeat(claimNumber.length)}] (Barcode)                    ║
 ╠══════════════════════════════════════════════════════════════╣
 ║ Receipt ID: ${receiptId.padEnd(40)} ║
 ║ Date: ${currentDate.padEnd(45)} ║
@@ -59,18 +63,20 @@ ${selectedDrugs.map(drug =>
 
 export const printReceiptText = async (receiptData: {
   receiptId: string;
+  claimNumber: string;
   currentDate: string;
   patientName: string;
   selectedDrugs: any[];
   totalAmount: number;
 }): Promise<boolean> => {
   try {
-    const { receiptId, currentDate, patientName, selectedDrugs, totalAmount } = receiptData;
+    const { receiptId, claimNumber, currentDate, patientName, selectedDrugs, totalAmount } = receiptData;
     
     // Create a simple text receipt
     const receiptText = `
 AssuredID Scanner - Receipt
 
+Claim Number: ${claimNumber}
 Receipt ID: ${receiptId}
 Date: ${currentDate}
 Patient: ${patientName}

@@ -13,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../App';
 import { printReceiptSimple } from '../utils/simplePrintUtils';
+import QRCode from 'react-native-qrcode-svg';
 
 type ReceiptScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Receipt'>;
 type ReceiptScreenRouteProp = RouteProp<RootStackParamList, 'Receipt'>;
@@ -25,6 +26,7 @@ interface Props {
 const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
   const { patientName, selectedDrugs, totalAmount } = route.params;
   const [receiptId, setReceiptId] = useState('');
+  const [claimNumber, setClaimNumber] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [isPrinting, setIsPrinting] = useState(false);
   const [printStatus, setPrintStatus] = useState('');
@@ -35,6 +37,13 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
       const timestamp = Date.now();
       const random = Math.floor(Math.random() * 1000);
       return `RCP-${timestamp}-${random}`;
+    };
+
+    // Generate claim number
+    const generateClaimNumber = () => {
+      const timestamp = Date.now();
+      const random = Math.floor(Math.random() * 10000);
+      return `CLM-${timestamp}-${random.toString().padStart(4, '0')}`;
     };
 
     const formatDate = () => {
@@ -49,6 +58,7 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
     };
 
     setReceiptId(generateReceiptId());
+    setClaimNumber(generateClaimNumber());
     setCurrentDate(formatDate());
   }, []);
 
@@ -60,6 +70,7 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
       setPrintStatus('Creating receipt...');
       const receiptData = {
         receiptId,
+        claimNumber,
         currentDate,
         patientName,
         selectedDrugs,
@@ -133,6 +144,22 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
 
       <View style={styles.receiptContainer}>
+        {/* Claim Number and Barcode Section */}
+        <View style={styles.claimSection}>
+          <Text style={styles.claimTitle}>Claim Number</Text>
+          <Text style={styles.claimNumber}>{claimNumber}</Text>
+          {claimNumber && (
+            <View style={styles.barcodeContainer}>
+              <QRCode
+                value={claimNumber}
+                size={120}
+                color="#000"
+                backgroundColor="#fff"
+              />
+            </View>
+          )}
+        </View>
+
         <View style={styles.receiptHeader}>
           <Text style={styles.receiptTitle}>Receipt</Text>
           <Text style={styles.receiptId}>ID: {receiptId}</Text>
@@ -231,6 +258,38 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  claimSection: {
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  claimTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  claimNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#113493',
+    marginBottom: 10,
+  },
+  barcodeContainer: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 3,
   },
   receiptHeader: {
     alignItems: 'center',

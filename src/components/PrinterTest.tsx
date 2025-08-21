@@ -28,6 +28,7 @@ const PrinterTest: React.FC = () => {
       addResult('Creating test receipt...');
       const testReceiptData = {
         receiptId: 'TEST-' + Date.now(),
+        claimNumber: 'CLM-TEST-' + Date.now(),
         currentDate: new Date().toLocaleString(),
         patientName: 'Test Patient',
         selectedDrugs: [
