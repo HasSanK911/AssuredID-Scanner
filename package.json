@@ -20,7 +20,8 @@
     "react-native-permissions": "^5.4.2",
     "react-native-reanimated": "^3.19.1",
     "react-native-safe-area-context": "^5.5.2",
-    "react-native-screens": "^4.14.1"
+    "react-native-screens": "^4.14.1",
+    "react-native-thermal-receipt-printer": "^1.2.0-rc.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

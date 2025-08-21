@@ -12,6 +12,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../App';
+import { printReceiptSimple } from '../utils/simplePrintUtils';
 
 type ReceiptScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Receipt'>;
 type ReceiptScreenRouteProp = RouteProp<RootStackParamList, 'Receipt'>;
@@ -25,6 +26,8 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
   const { patientName, selectedDrugs, totalAmount } = route.params;
   const [receiptId, setReceiptId] = useState('');
   const [currentDate, setCurrentDate] = useState('');
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [printStatus, setPrintStatus] = useState('');
 
   useEffect(() => {
     // Generate receipt ID and current date
@@ -50,49 +53,53 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
   }, []);
 
   const handlePrint = async () => {
+    setIsPrinting(true);
+    setPrintStatus('Preparing receipt...');
+    
     try {
-      // Create receipt content
-      const receiptContent = `
-AssuredID Scanner - Receipt
-
-Receipt ID: ${receiptId}
-Date: ${currentDate}
-Patient: ${patientName}
-
-Items:
-${selectedDrugs.map(drug => 
-  `${drug.name} (${drug.size}) - ${drug.currency} ${drug.price.toFixed(2)}`
-).join('\n')}
-
-Total: USD ${totalAmount.toFixed(2)}
-
-Thank you for your purchase!
-      `.trim();
-
-      // Share the receipt (simulates printing)
-      await Share.share({
-        message: receiptContent,
-        title: 'AssuredID Receipt',
-      });
-
-      Alert.alert(
-        'Receipt Printed',
-        'Your receipt has been generated and shared successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () =>
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'IdScanner' }],
-              }),
-          },
-        ]
-      );
+      setPrintStatus('Creating receipt...');
+      const receiptData = {
+        receiptId,
+        currentDate,
+        patientName,
+        selectedDrugs,
+        totalAmount
+      };
+      
+      const printSuccess = await printReceiptSimple(receiptData);
+      
+      if (printSuccess) {
+        setPrintStatus('Receipt shared successfully!');
+        setIsPrinting(false);
+        
+        Alert.alert(
+          'Receipt Shared',
+          'Your receipt has been shared successfully! You can print it from the share menu.',
+          [
+            {
+              text: 'OK',
+              onPress: () =>
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'IdScanner' }],
+                }),
+            },
+          ]
+        );
+      } else {
+        setPrintStatus('Printing failed.');
+        setIsPrinting(false);
+        Alert.alert('Error', 'Failed to share receipt. Please try again.');
+      }
     } catch (error) {
-      Alert.alert('Error', 'Failed to print receipt. Please try again.');
+      console.log('Print error:', error);
+      setPrintStatus('Printing failed.');
+      setIsPrinting(false);
+      Alert.alert('Error', 'Failed to share receipt. Please try again.');
     }
   };
+
+
 
   const handleNewOrder = () => {
     Alert.alert(
@@ -159,12 +166,28 @@ Thank you for your purchase!
           </View>
         </View>
 
+        {isPrinting && (
+          <View style={styles.statusContainer}>
+            <Text style={styles.statusText}>{printStatus}</Text>
+          </View>
+        )}
+
         <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.printButton} onPress={handlePrint}>
-            <Text style={styles.printButtonText}>Print Receipt</Text>
+          <TouchableOpacity 
+            style={[styles.printButton, isPrinting && styles.disabledButton]} 
+            onPress={handlePrint}
+            disabled={isPrinting}
+          >
+            <Text style={styles.printButtonText}>
+              {isPrinting ? 'Printing...' : 'Print Receipt'}
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.newOrderButton} onPress={handleNewOrder}>
+          <TouchableOpacity 
+            style={[styles.newOrderButton, isPrinting && styles.disabledButton]} 
+            onPress={handleNewOrder}
+            disabled={isPrinting}
+          >
             <Text style={styles.newOrderButtonText}>New Order</Text>
           </TouchableOpacity>
         </View>
@@ -338,6 +361,23 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  statusContainer: {
+    backgroundColor: '#f8f9fa',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: '#113493',
+  },
+  statusText: {
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
 
