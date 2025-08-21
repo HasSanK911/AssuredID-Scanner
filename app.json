@@ -1,4 +1,30 @@
 {
   "name": "AssuredIdScanner",
-  "displayName": "AssuredIdScanner"
+  "displayName": "AssuredID Scanner",
+  "expo": {
+    "name": "AssuredID Scanner",
+    "slug": "assured-id-scanner",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/logo.png",
+    "splash": {
+      "image": "./src/assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#113493"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.assuredidscanner.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/logo.png",
+        "backgroundColor": "#113493"
+      },
+      "package": "com.assuredidscanner.app"
+    }
+  }
 }

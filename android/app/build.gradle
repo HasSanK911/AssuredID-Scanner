@@ -117,3 +117,9 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.facebook.react:react-native:0.81.0'
+    }
+}

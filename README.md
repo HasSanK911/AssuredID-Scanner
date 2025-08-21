@@ -1,97 +1,171 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# AssuredID Scanner
 
-# Getting Started
+A React Native mobile application for scanning Assured IDs and managing patient drug prescriptions.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
 
-## Step 1: Start Metro
+- **Login System**: Secure authentication with username and password
+- **ID Scanner**: Manual input or QR code scanning for Assured IDs
+- **Patient Details**: View patient information and claim status
+- **Drug Selection**: Interactive drug selection with pricing
+- **Receipt Generation**: Print receipts with detailed information
+- **Professional UI**: Modern, clean interface with consistent branding
+- **Splash Screen**: Logo display on app launch
+- **Logout Functionality**: Logout button in header of all screens
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## App Branding
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- **App Name**: AssuredID Scanner
+- **Logo**: Custom logo from assets folder
+- **Primary Color**: #113493 (Professional Blue)
+- **Splash Screen**: Logo display with branded background
 
-```sh
-# Using npm
-npm start
+## Screens
 
-# OR using Yarn
-yarn start
+### 1. Splash Screen
+- Displays the AssuredID Scanner logo
+- 2-second duration with branded background (#113493)
+- Smooth transition to login screen
+- Logo properly sized and centered
+
+### 2. Login Screen
+- AssuredID Scanner logo at the top
+- Username and password input fields
+- Professional login button
+- Form validation
+- No logout button (as expected)
+
+### 3. ID Scanner Screen
+- Logo display
+- Assured ID input field
+- QR code scanner button (📷)
+- Find button to search patient
+- Logout button in header
+
+### 4. QR Scanner Screen
+- Simulated QR code scanning
+- Manual input option
+- Returns to ID Scanner with scanned data
+- Logout button in header
+
+### 5. Patient Details Screen
+- Logo display
+- Patient name (read-only input)
+- Claim status display
+- "Select Drugs" button
+- Logout button in header
+
+### 6. Drug Selection Screen
+- Logo display
+- Interactive drug selection buttons
+- Each drug shows: name, price, size, currency
+- Selected drugs change background color
+- Total amount calculation
+- Submit button
+- Logout button in header
+
+### 7. Receipt Screen
+- Logo display
+- Receipt with unique ID and timestamp
+- Selected drugs and prices
+- Total amount
+- Print receipt (Share API)
+- New order option
+- Logout button in header
+
+## Technical Details
+
+### Navigation
+- React Navigation Stack Navigator
+- TypeScript for type safety
+- Proper screen parameter passing
+- Logout functionality with confirmation dialog
+
+### Data
+- Static/mock data for demonstration
+- Patient information simulation
+- Drug catalog with pricing
+- Dynamic receipt generation
+
+### UI/UX
+- Consistent color scheme (#113493)
+- Professional shadows and rounded corners
+- Responsive design
+- Loading states and error handling
+- Logout button in header of all screens except login
+
+### Android Integration
+- Custom app icon using logo
+- Splash screen with logo display
+- App name: "AssuredID Scanner"
+- Proper permissions for camera and storage
+- Native splash screen implementation
+
+## Demo Flow
+
+1. **Launch App**: See splash screen with logo for 2 seconds
+2. **Login**: Enter any username/password
+3. **ID Scanner**: 
+   - Enter Assured ID manually, OR
+   - Click QR icon for simulated scanning
+   - Use "Generate Test QR" for demo data
+4. **Patient Details**: View patient information
+5. **Drug Selection**: Select multiple drugs
+6. **Receipt**: View and "print" receipt
+7. **Logout**: Use logout button in header to return to login
+
+## Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. For Android:
+   ```bash
+   npx react-native run-android
+   ```
+
+## Development
+
+### Running the App
+```bash
+# Terminal 1: Start Metro bundler
+npx react-native start
+
+# Terminal 2: Run on Android
+npx react-native run-android
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+### Project Structure
+```
+src/
+├── assets/
+│   └── logo.png          # App logo
+├── components/
+│   └── QRCodeGenerator.tsx
+└── screens/
+    ├── LoginScreen.tsx
+    ├── IdScannerScreen.tsx
+    ├── QRScannerScreen.tsx
+    ├── PatientDetailsScreen.tsx
+    ├── DrugSelectionScreen.tsx
+    └── ReceiptScreen.tsx
 ```
 
-### iOS
+## Dependencies
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+- React Navigation
+- React Native Safe Area Context
+- TypeScript
+- React Native Gesture Handler
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+## Notes
 
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- QR Scanner is simulated for demo purposes
+- All data is static/mocked
+- Receipt printing uses Share API
+- App icon and splash screen use the logo from assets
+- Professional branding throughout the application
+- Logout button appears in header of all screens except login
+- Splash screen shows logo for 2 seconds on app launch
