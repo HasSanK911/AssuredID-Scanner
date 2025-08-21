@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App';
+import { Camera } from 'react-native-camera-kit';
 
 type QRScannerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'QRScanner'>;
 
@@ -18,10 +19,13 @@ interface Props {
 }
 
 const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
-  const handleScanQRCode = () => {
+  const [isScanning, setIsScanning] = useState(false);
+
+  const handleScan = (event: any) => {
+    setIsScanning(false); // close scanner after scan
     Alert.alert(
-      'QR Code Scanned Successfully!',
-      'ID: ASID123456789 has been scanned.',
+      'QR Code Scanned!',
+      `Code: ${event.nativeEvent.codeStringValue}`,
       [
         {
           text: 'Cancel',
@@ -30,7 +34,7 @@ const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
         {
           text: 'View Details',
           onPress: () => {
-            navigation.navigate('PatientDetails', { assuredId: 'ASID123456789' });
+            navigation.navigate('PatientDetails', { assuredId: event.nativeEvent.codeStringValue });
           },
         },
       ]
@@ -44,26 +48,41 @@ const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       <View style={styles.scannerContainer}>
-        <View style={styles.scannerContent}>
-          <Text style={styles.scannerIcon}>📷</Text>
-          <Text style={styles.scannerTitle}>QR Code Scanner</Text>
-          <Text style={styles.scannerSubtitle}>
-            Tap the button below to scan a QR code
-          </Text>
-          
-          <TouchableOpacity style={styles.scanButton} onPress={handleScanQRCode}>
-            <Text style={styles.scanButtonText}>Scan QR Code</Text>
-          </TouchableOpacity>
-        </View>
+        {isScanning ? (
+          <Camera
+            style={{ flex: 1 }}
+            scanBarcode={true}
+            onReadCode={handleScan}
+            showFrame={true}
+            laserColor="red"
+            frameColor="white"
+          />
+        ) : (
+          <View style={styles.scannerContent}>
+            <Text style={styles.scannerIcon}>📷</Text>
+            <Text style={styles.scannerTitle}>QR Code Scanner</Text>
+            <Text style={styles.scannerSubtitle}>
+              Tap the button below to scan a QR code
+            </Text>
+
+            <TouchableOpacity
+              style={styles.scanButton}
+              onPress={() => setIsScanning(true)}
+            >
+              <Text style={styles.scanButtonText}>Scan QR Code</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
-      <View style={styles.instructions}>
-        <Text style={styles.instructionsTitle}>How to use:</Text>
-        <Text style={styles.instructionText}>• Tap "Scan QR Code" to simulate scanning</Text>
-        <Text style={styles.instructionText}>• A popup will show the scanned ID</Text>
-        <Text style={styles.instructionText}>• Click "View Details" to see patient information</Text>
-        <Text style={styles.instructionText}>• Test ID: ASID123456789</Text>
-      </View>
+      {!isScanning && (
+        <View style={styles.instructions}>
+          <Text style={styles.instructionsTitle}>How to use:</Text>
+          <Text style={styles.instructionText}>• Tap "Scan QR Code" to start scanning</Text>
+          <Text style={styles.instructionText}>• A popup will show the scanned ID</Text>
+          <Text style={styles.instructionText}>• Click "View Details" to see patient information</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -95,11 +114,9 @@ const styles = StyleSheet.create({
     margin: 20,
     borderRadius: 15,
     backgroundColor: '#fff',
+    overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
@@ -146,10 +163,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
