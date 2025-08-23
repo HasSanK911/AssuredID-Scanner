@@ -14,6 +14,7 @@ import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../App';
 import { printReceiptSimple } from '../utils/simplePrintUtils';
 import QRCode from 'react-native-qrcode-svg';
+import SimpleBarcode from '../components/SimpleBarcode';
 
 type ReceiptScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Receipt'>;
 type ReceiptScreenRouteProp = RouteProp<RootStackParamList, 'Receipt'>;
@@ -137,11 +138,19 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.claimNumber}>{claimNumber}</Text>
           {claimNumber && (
             <View style={styles.barcodeContainer}>
-              <QRCode
+              {/* <Text style={styles.barcodeLabel}>QR Code:</Text> */}
+              {/* <QRCode
                 value={claimNumber}
                 size={120}
                 color="#000"
                 backgroundColor="#fff"
+              /> */}
+              <Text style={styles.barcodeLabel}>Barcode:</Text>
+              <SimpleBarcode
+                value={claimNumber}
+                height={50}
+                width={280}
+                showText={true}
               />
             </View>
           )}
@@ -277,6 +286,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 3,
+  },
+  barcodeLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 10,
+    marginBottom: 5,
   },
   receiptHeader: {
     alignItems: 'center',

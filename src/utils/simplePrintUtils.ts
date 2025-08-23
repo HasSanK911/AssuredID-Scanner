@@ -1,5 +1,6 @@
 import { Share, Alert } from 'react-native';
 import SunmiPrinter from '@mitsuharu/react-native-sunmi-printer-library';
+import { generateTextBarcode } from './barcodeGenerator';
 
 export const printReceiptSimple = async (receiptData: {
   receiptId: string;
@@ -30,28 +31,29 @@ export const printReceiptSimple = async (receiptData: {
 
     // Fallback: Create a formatted receipt text for sharing
     const receiptText = `
-╔══════════════════════════════════════════════════════════════╗
-║                    AssuredID Scanner - Receipt               ║
-╠══════════════════════════════════════════════════════════════╣
-║ Claim Number: ${claimNumber.padEnd(35)} ║
-║ [${'█'.repeat(claimNumber.length)}] (Barcode)                    ║
-╠══════════════════════════════════════════════════════════════╣
-║ Receipt ID: ${receiptId.padEnd(40)} ║
-║ Date: ${currentDate.padEnd(45)} ║
-║ Patient: ${patientName.padEnd(42)} ║
-╠══════════════════════════════════════════════════════════════╣
-║ Items:                                                        ║
-${selectedDrugs.map(drug => 
+ ╔══════════════════════════════════════════════════════════════╗
+ ║                    AssuredID Scanner - Receipt               ║
+ ╠══════════════════════════════════════════════════════════════╣
+ ║ Claim Number: ${claimNumber.padEnd(35)} ║
+ ║ QR Code: [QR Code containing: ${claimNumber}]                ║
+ ║ Barcode: ${generateTextBarcode(claimNumber)}                 ║
+ ╠══════════════════════════════════════════════════════════════╣
+ ║ Receipt ID: ${receiptId.padEnd(40)} ║
+ ║ Date: ${currentDate.padEnd(45)} ║
+ ║ Patient: ${patientName.padEnd(42)} ║
+ ╠══════════════════════════════════════════════════════════════╣
+ ║ Items:                                                        ║
+ ${selectedDrugs.map(drug => 
   `║ • ${drug.name} (${drug.size})`.padEnd(50) + 
   `${drug.currency} ${drug.price.toFixed(2)}`.padStart(10) + ' ║'
 ).join('\n')}
-╠══════════════════════════════════════════════════════════════╣
-║ Total: ${'USD ' + totalAmount.toFixed(2).padStart(40)} ║
-╠══════════════════════════════════════════════════════════════╣
-║                                                              ║
-║           Thank you for your purchase!                      ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
+ ╠══════════════════════════════════════════════════════════════╣
+ ║ Total: ${'USD ' + totalAmount.toFixed(2).padStart(40)} ║
+ ╠══════════════════════════════════════════════════════════════╣
+ ║                                                              ║
+ ║           Thank you for your purchase!                      ║
+ ║                                                              ║
+ ╚══════════════════════════════════════════════════════════════╝
     `.trim();
 
     // Share the receipt as fallback
@@ -100,8 +102,16 @@ export const printReceiptWithSunmi = async (receiptData: {
     await SunmiPrinter.setFontSize(20);
     await SunmiPrinter.printText(`Claim Number: ${claimNumber}\n`);
     
-    // Print barcode
+    // Print QR code barcode
+    await SunmiPrinter.printText('QR Code:\n');
     await SunmiPrinter.printQRCode(claimNumber, 200, 200);
+    await SunmiPrinter.printText('\n');
+    
+    // Print simple barcode
+    await SunmiPrinter.printText('Barcode:\n');
+    const barcodePattern = generateTextBarcode(claimNumber);
+    await SunmiPrinter.printText(barcodePattern + '\n');
+    await SunmiPrinter.printText(claimNumber + '\n');
     await SunmiPrinter.printText('\n');
     
     await SunmiPrinter.setFontSize(16);

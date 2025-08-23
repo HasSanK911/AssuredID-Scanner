@@ -39,6 +39,7 @@ const PrinterTest: React.FC = () => {
       await SunmiPrinter.printText('Date: ' + new Date().toLocaleString() + '\n');
       await SunmiPrinter.printText('Status: Connected Successfully\n');
       await SunmiPrinter.printText('Printer: Sunmi Thermal Printer\n');
+      await SunmiPrinter.printText('Barcode Test: QR + Code128\n');
       await SunmiPrinter.printText('=== END TEST ===\n');
       await SunmiPrinter.printText('\n\n\n'); // Feed paper
       await SunmiPrinter.paperCut(); // Cut paper
@@ -171,7 +172,8 @@ const PrinterTest: React.FC = () => {
       <View style={styles.instructions}>
         <Text style={styles.instructionsTitle}>Instructions:</Text>
         <Text style={styles.instructionText}>• "Test Sunmi Printer" - Tests basic Sunmi printer connectivity</Text>
-        <Text style={styles.instructionText}>• "Test Receipt Printing" - Tests full receipt printing with claim number and barcode</Text>
+        <Text style={styles.instructionText}>• "Test Receipt Printing" - Tests full receipt printing with claim number and barcodes</Text>
+        <Text style={styles.instructionText}>• Receipts include both QR code and traditional barcode (Code128)</Text>
         <Text style={styles.instructionText}>• Ensure your Sunmi printer is connected and ready</Text>
         <Text style={styles.instructionText}>• If printer is not available, receipt will be shared via share menu</Text>
       </View>
