@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { printReceiptSimple } from '../utils/simplePrintUtils';
+import SunmiPrinter from '@mitsuharu/react-native-sunmi-printer-library';
 
 const PrinterTest: React.FC = () => {
   const [isTesting, setIsTesting] = useState(false);
@@ -17,12 +18,57 @@ const PrinterTest: React.FC = () => {
     setTestResults(prev => [...prev, `${new Date().toLocaleTimeString()}: ${result}`]);
   };
 
+  const testSunmiPrinter = async () => {
+    setIsTesting(true);
+    setTestResults([]);
+    
+    try {
+      addResult('Testing Sunmi printer connection...');
+      
+      // Test 1: Initialize printer
+      addResult('Initializing printer...');
+      await SunmiPrinter.initPrinter();
+      addResult('✅ Printer initialized successfully');
+      
+      // Test 2: Print a simple test receipt
+      addResult('Printing test receipt...');
+      await SunmiPrinter.setAlignment(1); // Center alignment
+      await SunmiPrinter.setFontSize(24);
+      await SunmiPrinter.printText('=== SUNMI PRINTER TEST ===\n');
+      await SunmiPrinter.setFontSize(16);
+      await SunmiPrinter.printText('Date: ' + new Date().toLocaleString() + '\n');
+      await SunmiPrinter.printText('Status: Connected Successfully\n');
+      await SunmiPrinter.printText('Printer: Sunmi Thermal Printer\n');
+      await SunmiPrinter.printText('=== END TEST ===\n');
+      await SunmiPrinter.printText('\n\n\n'); // Feed paper
+      await SunmiPrinter.paperCut(); // Cut paper
+      
+      addResult('✅ Test receipt printed successfully');
+      
+      Alert.alert(
+        'Sunmi Printer Test Complete',
+        'Sunmi printer test completed successfully! Check your printer for the test receipt.',
+        [{ text: 'OK' }]
+      );
+
+    } catch (error) {
+      addResult(`❌ Error: ${error}`);
+      Alert.alert(
+        'Sunmi Printer Test Error',
+        `An error occurred during testing: ${error}`,
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
   const testPrinterConnection = async () => {
     setIsTesting(true);
     setTestResults([]);
     
     try {
-      addResult('Starting receipt sharing test...');
+      addResult('Starting receipt printing test...');
       
       // Test 1: Create test receipt data
       addResult('Creating test receipt...');
@@ -38,23 +84,23 @@ const PrinterTest: React.FC = () => {
         totalAmount: 41.49
       };
 
-      // Test 2: Try to share the receipt
-      addResult('Testing receipt sharing...');
+      // Test 2: Try to print the receipt
+      addResult('Testing receipt printing...');
       const printSuccess = await printReceiptSimple(testReceiptData);
       
       if (printSuccess) {
-        addResult('✅ Receipt shared successfully!');
-        addResult('You can now print it from the share menu.');
+        addResult('✅ Receipt printed successfully!');
+        addResult('Check your printer for the test receipt.');
         Alert.alert(
           'Test Complete',
-          'Receipt sharing test completed successfully! Check the share menu for printing options.',
+          'Receipt printing test completed successfully! Check your printer for the test receipt.',
           [{ text: 'OK' }]
         );
       } else {
-        addResult('❌ Failed to share receipt');
+        addResult('❌ Failed to print receipt');
         Alert.alert(
           'Test Failed',
-          'Receipt sharing test failed. Check the results above for details.',
+          'Receipt printing test failed. Check the results above for details.',
           [{ text: 'OK' }]
         );
       }
@@ -78,18 +124,28 @@ const PrinterTest: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Receipt Test</Text>
-        <Text style={styles.subtitle}>Test receipt sharing and printing</Text>
+        <Text style={styles.title}>Printer Test</Text>
+        <Text style={styles.subtitle}>Test Sunmi printer and receipt printing</Text>
       </View>
 
       <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.testButton, isTesting && styles.disabledButton]}
+          onPress={testSunmiPrinter}
+          disabled={isTesting}
+        >
+          <Text style={styles.testButtonText}>
+            {isTesting ? 'Testing...' : 'Test Sunmi Printer'}
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={[styles.testButton, isTesting && styles.disabledButton]}
           onPress={testPrinterConnection}
           disabled={isTesting}
         >
           <Text style={styles.testButtonText}>
-            {isTesting ? 'Testing...' : 'Run Receipt Test'}
+            {isTesting ? 'Testing...' : 'Test Receipt Printing'}
           </Text>
         </TouchableOpacity>
 
@@ -114,10 +170,10 @@ const PrinterTest: React.FC = () => {
 
       <View style={styles.instructions}>
         <Text style={styles.instructionsTitle}>Instructions:</Text>
-        <Text style={styles.instructionText}>• Tap "Run Receipt Test" to test receipt sharing</Text>
-        <Text style={styles.instructionText}>• The receipt will be shared via the device's share menu</Text>
-        <Text style={styles.instructionText}>• You can print it from the share menu options</Text>
-        <Text style={styles.instructionText}>• This tests the same functionality used in the main app</Text>
+        <Text style={styles.instructionText}>• "Test Sunmi Printer" - Tests basic Sunmi printer connectivity</Text>
+        <Text style={styles.instructionText}>• "Test Receipt Printing" - Tests full receipt printing with claim number and barcode</Text>
+        <Text style={styles.instructionText}>• Ensure your Sunmi printer is connected and ready</Text>
+        <Text style={styles.instructionText}>• If printer is not available, receipt will be shared via share menu</Text>
       </View>
     </ScrollView>
   );

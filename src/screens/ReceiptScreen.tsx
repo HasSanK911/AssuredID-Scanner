@@ -64,7 +64,7 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const handlePrint = async () => {
     setIsPrinting(true);
-    setPrintStatus('Preparing receipt...');
+    setPrintStatus('Initializing printer...');
     
     try {
       setPrintStatus('Creating receipt...');
@@ -80,33 +80,20 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
       const printSuccess = await printReceiptSimple(receiptData);
       
       if (printSuccess) {
-        setPrintStatus('Receipt shared successfully!');
+        setPrintStatus('Receipt processed successfully!');
         setIsPrinting(false);
         
-        Alert.alert(
-          'Receipt Shared',
-          'Your receipt has been shared successfully! You can print it from the share menu.',
-          [
-            {
-              text: 'OK',
-              onPress: () =>
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'IdScanner' }],
-                }),
-            },
-          ]
-        );
+        // Don't show alert here as it's handled in the print function
       } else {
         setPrintStatus('Printing failed.');
         setIsPrinting(false);
-        Alert.alert('Error', 'Failed to share receipt. Please try again.');
+        Alert.alert('Error', 'Failed to print receipt. Please try again.');
       }
     } catch (error) {
       console.log('Print error:', error);
       setPrintStatus('Printing failed.');
       setIsPrinting(false);
-      Alert.alert('Error', 'Failed to share receipt. Please try again.');
+      Alert.alert('Error', 'Failed to print receipt. Please try again.');
     }
   };
 
