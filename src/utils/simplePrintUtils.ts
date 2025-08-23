@@ -14,9 +14,12 @@ export const printReceiptSimple = async (receiptData: {
     const { receiptId, claimNumber, currentDate, patientName, selectedDrugs, totalAmount } = receiptData;
     
     // First try to print using Sunmi printer
+    let printerSuccess = false;
     try {
+      console.log('Attempting to print with Sunmi printer...');
       const printSuccess = await printReceiptWithSunmi(receiptData);
       if (printSuccess) {
+        printerSuccess = true;
         Alert.alert(
           'Print Success',
           'Receipt printed successfully on paper!',
@@ -26,16 +29,20 @@ export const printReceiptSimple = async (receiptData: {
       }
     } catch (printerError) {
       console.log('Sunmi printer error:', printerError);
-      // Fall back to share method if printer fails
+      // Continue to fallback method
     }
 
-    // Fallback: Create a formatted receipt text for sharing
-    const receiptText = `
+    // If printer failed or not available, use fallback
+    if (!printerSuccess) {
+      console.log('Printer not available, using fallback share method...');
+      
+      // Fallback: Create a formatted receipt text for sharing
+      const receiptText = `
  ╔══════════════════════════════════════════════════════════════╗
  ║                    AssuredID Scanner - Receipt               ║
  ╠══════════════════════════════════════════════════════════════╣
  ║ Claim Number: ${claimNumber.padEnd(35)} ║
- ║ QR Code: [QR Code containing: ${claimNumber}]                ║
+ ║ ${claimNumber}]                ║
  ║ Barcode: ${generateTextBarcode(claimNumber)}                 ║
  ╠══════════════════════════════════════════════════════════════╣
  ║ Receipt ID: ${receiptId.padEnd(40)} ║
@@ -54,21 +61,24 @@ export const printReceiptSimple = async (receiptData: {
  ║           Thank you for your purchase!                      ║
  ║                                                              ║
  ╚══════════════════════════════════════════════════════════════╝
-    `.trim();
+      `.trim();
 
-    // Share the receipt as fallback
-    await Share.share({
-      message: receiptText,
-      title: 'AssuredID Receipt',
-    });
+      // Share the receipt as fallback
+      await Share.share({
+        message: receiptText,
+        title: 'AssuredID Receipt',
+      });
 
-    Alert.alert(
-      'Receipt Shared',
-      'Printer not available. Receipt has been shared via the share menu.',
-      [{ text: 'OK' }]
-    );
+      Alert.alert(
+        'Receipt Shared',
+        'Printer not available. Receipt has been shared via the share menu.',
+        [{ text: 'OK' }]
+      );
 
-    return true;
+      return true;
+    }
+
+    return false;
   } catch (error) {
     console.log('Print error:', error);
     Alert.alert(
@@ -91,8 +101,11 @@ export const printReceiptWithSunmi = async (receiptData: {
   try {
     const { receiptId, claimNumber, currentDate, patientName, selectedDrugs, totalAmount } = receiptData;
 
+    console.log('Initializing Sunmi printer...');
     // Initialize printer
     await SunmiPrinter.initPrinter();
+    
+    console.log('Setting printer alignment...');
     await SunmiPrinter.setAlignment(1); // Center alignment
     await SunmiPrinter.setFontSize(24);
     await SunmiPrinter.printText('AssuredID Scanner - Receipt\n');
@@ -144,9 +157,11 @@ export const printReceiptWithSunmi = async (receiptData: {
     // Cut paper
     await SunmiPrinter.paperCut();
     
+    console.log('Sunmi printer completed successfully');
     return true;
   } catch (error) {
     console.log('Sunmi printer error:', error);
+    // Re-throw the error so the main function can catch it
     throw error;
   }
 };
