@@ -6,15 +6,24 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Share,
   Image,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../App';
-import { printReceiptSimple } from '../utils/simplePrintUtils';
 import QRCode from 'react-native-qrcode-svg';
 import SimpleBarcode from '../components/SimpleBarcode';
+
+// Import Sunmi printer functions
+import {
+  prepare,
+  setAlignment,
+  setFontSize,
+  printText,
+  printBarcode,
+  lineWrap,
+  cutPaper,
+} from '@mitsuharu/react-native-sunmi-printer-library';
 
 type ReceiptScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Receipt'>;
 type ReceiptScreenRouteProp = RouteProp<RootStackParamList, 'Receipt'>;
@@ -68,7 +77,22 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
     setPrintStatus('Initializing printer...');
     
     try {
-      setPrintStatus('Creating receipt...');
+      // Check if SunmiPrinter is available
+      if (!prepare) {
+        throw new Error('Sunmi printer library is not available');
+      }
+      
+      // Test if the library is working
+      setPrintStatus('Testing printer library...');
+      console.log('Sunmi printer functions loaded successfully');
+      
+      setPrintStatus('Checking printer connection...');
+      
+      // Initialize Sunmi printer
+      await prepare();
+      
+      setPrintStatus('Printing receipt...');
+      
       const receiptData = {
         receiptId,
         claimNumber,
@@ -78,26 +102,103 @@ const ReceiptScreen: React.FC<Props> = ({ navigation, route }) => {
         totalAmount
       };
       
-      const printSuccess = await printReceiptSimple(receiptData);
+      // Print the receipt directly
+      const printSuccess = await printReceiptWithSunmi(receiptData);
       
       if (printSuccess) {
-        setPrintStatus('Receipt processed successfully!');
-        setIsPrinting(false);
-        
-        // Don't show alert here as it's handled in the print function
+        setPrintStatus('Receipt printed successfully!');
+        Alert.alert(
+          'Print Success',
+          'Receipt printed successfully on thermal printer!',
+          [{ text: 'OK' }]
+        );
       } else {
         setPrintStatus('Printing failed.');
-        setIsPrinting(false);
         Alert.alert('Error', 'Failed to print receipt. Please try again.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log('Print error:', error);
-      setPrintStatus('Printing failed.');
+      setPrintStatus('Printer not available.');
+      
+      if (error?.message === 'Sunmi printer library is not available') {
+        console.log('Sunmi printer library is not properly installed or linked. Please check the installation.');
+      } else {
+        console.log('Thermal printer is not connected or not available. Please check your printer connection.');
+      }
+    } finally {
       setIsPrinting(false);
-      Alert.alert('Error', 'Failed to print receipt. Please try again.');
     }
   };
 
+  const printReceiptWithSunmi = async (receiptData: {
+    receiptId: string;
+    claimNumber: string;
+    currentDate: string;
+    patientName: string;
+    selectedDrugs: any[];
+    totalAmount: number;
+  }): Promise<boolean> => {
+    try {
+      const { receiptId, claimNumber, currentDate, patientName, selectedDrugs, totalAmount } = receiptData;
+
+      console.log('Printing receipt with Sunmi printer...');
+      
+      // Set center alignment and print header with larger font
+      await setAlignment('center');
+      await setFontSize(28); // Increased from 24
+      await printText('AssuredID Scanner - Receipt\n');
+      await printText('═══════════════════════════════════════════\n');
+      
+      // Print claim number with larger font
+      await setFontSize(24); // Increased from 20
+      await printText(`Claim Number: ${claimNumber}\n`);
+      
+      // Print barcode
+      await printText('Barcode:\n');
+      await printBarcode(claimNumber, 'CODE128', 162, 2, 'textUnderBarcode');
+      await printText('\n');
+      
+      // Print receipt details with larger font
+      await setFontSize(20); // Increased from 16
+      await printText(`Receipt ID: ${receiptId}\n`);
+      await printText(`Date: ${currentDate}\n`);
+      await printText(`Patient: ${patientName}\n`);
+      await printText('═══════════════════════════════════════════\n');
+      
+      // Print items with larger font
+      await printText('Items:\n');
+      for (const drug of selectedDrugs) {
+        await printText(`• ${drug.name} (${drug.size})\n`);
+        await setAlignment('right');
+        await printText(`${drug.currency} ${drug.price.toFixed(2)}\n`);
+        await setAlignment('left');
+        // Add 10px spacing between items (approximately 1 line feed)
+        await lineWrap(1);
+      }
+      
+      await printText('═══════════════════════════════════════════\n');
+      
+      // Print total with larger font
+      await setFontSize(24); // Increased from 20
+      await setAlignment('right');
+      await printText(`Total: USD ${totalAmount.toFixed(2)}\n`);
+      await setAlignment('center');
+      
+      await printText('═══════════════════════════════════════════\n');
+      await setFontSize(20); // Increased from default
+      await printText('Thank you for your purchase!\n');
+      await lineWrap(1); // Feed paper
+      
+      // Cut paper
+      await cutPaper();
+      
+      console.log('Sunmi printer completed successfully');
+      return true;
+    } catch (error) {
+      console.log('Sunmi printer error:', error);
+      throw error;
+    }
+  };
 
 
   const handleNewOrder = () => {
